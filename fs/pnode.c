@@ -13,10 +13,6 @@
 #include "internal.h"
 #include "pnode.h"
 
-#ifdef CONFIG_RKP_NS_PROT
-void rkp_set_mnt_flags(struct vfsmount *mnt,int flags);
-void rkp_reset_mnt_flags(struct vfsmount *mnt,int flags);
-#endif
 /* return the next shared peer mount of @p */
 static inline struct mount *next_peer(struct mount *p)
 {
@@ -41,11 +37,7 @@ static struct mount *get_peer_under_root(struct mount *mnt,
 
 	do {
 		/* Check the namespace first for optimization */
-#ifdef CONFIG_RKP_NS_PROT
-		if (m->mnt_ns == ns && is_path_reachable(m, m->mnt->mnt_root, root))
-#else
 		if (m->mnt_ns == ns && is_path_reachable(m, m->mnt.mnt_root, root))
-#endif
 			return m;
 
 		m = next_peer(m);
@@ -84,11 +76,7 @@ static int do_make_slave(struct mount *mnt)
 	 * slave it to anything that is available.
 	 */
 	while ((peer_mnt = next_peer(peer_mnt)) != mnt &&
-#ifdef CONFIG_RKP_NS_PROT
-	       peer_mnt->mnt->mnt_root != mnt->mnt->mnt_root) ;
-#else
 	       peer_mnt->mnt.mnt_root != mnt->mnt.mnt_root) ;
-#endif
 
 	if (peer_mnt == mnt) {
 		peer_mnt = next_peer(mnt);
@@ -138,20 +126,10 @@ void change_mnt_propagation(struct mount *mnt, int type)
 	if (type != MS_SLAVE) {
 		list_del_init(&mnt->mnt_slave);
 		mnt->mnt_master = NULL;
-		if (type == MS_UNBINDABLE) {
-#ifdef CONFIG_RKP_NS_PROT
-			rkp_set_mnt_flags(mnt->mnt,MNT_UNBINDABLE);
-#else
+		if (type == MS_UNBINDABLE)
 			mnt->mnt.mnt_flags |= MNT_UNBINDABLE;
-#endif
-		}
-		else {
-#ifdef CONFIG_RKP_NS_PROT
-			rkp_reset_mnt_flags(mnt->mnt,MNT_UNBINDABLE);
-#else
+		else
 			mnt->mnt.mnt_flags &= ~MNT_UNBINDABLE;
-#endif
-		}
 	}
 }
 
@@ -237,11 +215,7 @@ static int propagate_one(struct mount *m)
 	if (IS_MNT_NEW(m))
 		return 0;
 	/* skip if mountpoint isn't covered by it */
-#ifdef CONFIG_RKP_NS_PROT
-	if (!is_subdir(mp->m_dentry, m->mnt->mnt_root))
-#else
 	if (!is_subdir(mp->m_dentry, m->mnt.mnt_root))
-#endif
 		return 0;
 	if (peers(m, last_dest)) {
 		type = CL_MAKE_SHARED;
@@ -272,18 +246,10 @@ static int propagate_one(struct mount *m)
 	/* Notice when we are propagating across user namespaces */
 	if (m->mnt_ns->user_ns != user_ns)
 		type |= CL_UNPRIVILEGED;
-#ifdef CONFIG_RKP_NS_PROT
-	child = copy_tree(last_source, last_source->mnt->mnt_root, type);
-#else
 	child = copy_tree(last_source, last_source->mnt.mnt_root, type);
-#endif
 	if (IS_ERR(child))
 		return PTR_ERR(child);
-#ifdef CONFIG_RKP_NS_PROT
-	rkp_reset_mnt_flags(child->mnt,MNT_LOCKED);
-#else
 	child->mnt.mnt_flags &= ~MNT_LOCKED;
-#endif
 	mnt_set_mountpoint(m, mp, child);
 	last_dest = m;
 	last_source = child;
@@ -358,6 +324,21 @@ out:
 	return ret;
 }
 
+static struct mount *find_topper(struct mount *mnt)
+{
+	/* If there is exactly one mount covering mnt completely return it. */
+	struct mount *child;
+
+	if (!list_is_singular(&mnt->mnt_mounts))
+		return NULL;
+
+	child = list_first_entry(&mnt->mnt_mounts, struct mount, mnt_child);
+	if (child->mnt_mountpoint != mnt->mnt.mnt_root)
+		return NULL;
+
+	return child;
+}
+
 /*
  * return true if the refcount is greater than count
  */
@@ -378,9 +359,8 @@ static inline int do_refcount_check(struct mount *mnt, int count)
  */
 int propagate_mount_busy(struct mount *mnt, int refcnt)
 {
-	struct mount *m, *child;
+	struct mount *m, *child, *topper;
 	struct mount *parent = mnt->mnt_parent;
-	int ret = 0;
 
 	if (mnt == parent)
 		return do_refcount_check(mnt, refcnt);
@@ -395,16 +375,24 @@ int propagate_mount_busy(struct mount *mnt, int refcnt)
 
 	for (m = propagation_next(parent, parent); m;
 	     		m = propagation_next(m, parent)) {
-#ifdef CONFIG_RKP_NS_PROT
-		child = __lookup_mnt_last(m->mnt, mnt->mnt_mountpoint);
-#else
-		child = __lookup_mnt_last(&m->mnt, mnt->mnt_mountpoint);
-#endif
-		if (child && list_empty(&child->mnt_mounts) &&
-		    (ret = do_refcount_check(child, 1)))
-			break;
+		int count = 1;
+		child = __lookup_mnt(&m->mnt, mnt->mnt_mountpoint);
+		if (!child)
+			continue;
+
+		/* Is there exactly one mount on the child that covers
+		 * it completely whose reference should be ignored?
+		 */
+		topper = find_topper(child);
+		if (topper)
+			count += 1;
+		else if (!list_empty(&child->mnt_mounts))
+			continue;
+
+		if (do_refcount_check(child, count))
+			return 1;
 	}
-	return ret;
+	return 0;
 }
 
 /*
@@ -421,16 +409,9 @@ void propagate_mount_unlock(struct mount *mnt)
 
 	for (m = propagation_next(parent, parent); m;
 			m = propagation_next(m, parent)) {
-#ifdef CONFIG_RKP_NS_PROT
-		child = __lookup_mnt_last(m->mnt, mnt->mnt_mountpoint);
-		if (child)
-			rkp_reset_mnt_flags(child->mnt,MNT_LOCKED);
-#else
-		child = __lookup_mnt_last(&m->mnt, mnt->mnt_mountpoint);
+		child = __lookup_mnt(&m->mnt, mnt->mnt_mountpoint);
 		if (child)
 			child->mnt.mnt_flags &= ~MNT_LOCKED;
-
-#endif
 	}
 }
 
@@ -446,13 +427,11 @@ static void mark_umount_candidates(struct mount *mnt)
 
 	for (m = propagation_next(parent, parent); m;
 			m = propagation_next(m, parent)) {
-#ifdef CONFIG_RKP_NS_PROT
-		struct mount *child = __lookup_mnt_last(m->mnt,
-#else
-		struct mount *child = __lookup_mnt_last(&m->mnt,
-#endif
+		struct mount *child = __lookup_mnt(&m->mnt,
 						mnt->mnt_mountpoint);
-		if (child && (!IS_MNT_LOCKED(child) || IS_MNT_MARKED(m))) {
+		if (!child || (child->mnt.mnt_flags & MNT_UMOUNT))
+			continue;
+		if (!IS_MNT_LOCKED(child) || IS_MNT_MARKED(m)) {
 			SET_MNT_MARK(child);
 		}
 	}
@@ -471,12 +450,8 @@ static void __propagate_umount(struct mount *mnt)
 
 	for (m = propagation_next(parent, parent); m;
 			m = propagation_next(m, parent)) {
-
-#ifdef CONFIG_RKP_NS_PROT
-		struct mount *child = __lookup_mnt_last(m->mnt,
-#else
-		struct mount *child = __lookup_mnt_last(&m->mnt,
-#endif
+		struct mount *topper;
+		struct mount *child = __lookup_mnt(&m->mnt,
 						mnt->mnt_mountpoint);
 		/*
 		 * umount the child only if the child has no children
@@ -485,13 +460,18 @@ static void __propagate_umount(struct mount *mnt)
 		if (!child || !IS_MNT_MARKED(child))
 			continue;
 		CLEAR_MNT_MARK(child);
+
+		/* If there is exactly one mount covering all of child
+		 * replace child with that mount.
+		 */
+		topper = find_topper(child);
+		if (topper)
+			mnt_change_mountpoint(child->mnt_parent, child->mnt_mp,
+					      topper);
+
 		if (list_empty(&child->mnt_mounts)) {
 			list_del_init(&child->mnt_child);
-#ifdef CONFIG_RKP_NS_PROT
-			rkp_set_mnt_flags(child->mnt,MNT_UMOUNT);
-#else
 			child->mnt.mnt_flags |= MNT_UMOUNT;
-#endif
 			list_move_tail(&child->mnt_list, &mnt->mnt_list);
 		}
 	}
