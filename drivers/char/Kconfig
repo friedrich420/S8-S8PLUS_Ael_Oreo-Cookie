@@ -583,10 +583,17 @@ config TELCLOCK
 	  controlling the behavior of this hardware.
 
 config DEVPORT
+<<<<<<< HEAD
 	bool
 	depends on !M68K && !ARM64
+=======
+	bool "/dev/port character device"
+>>>>>>> c55fa6c19... Linux 4.4.60>>>4.4.66
 	depends on ISA || PCI
 	default y
+	help
+	  Say Y here if you want to support the /dev/port device. The /dev/port
+	  device is similar to /dev/mem, but for I/O ports.
 
 source "drivers/s390/char/Kconfig"
 
