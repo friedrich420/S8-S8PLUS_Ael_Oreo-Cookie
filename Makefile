@@ -405,11 +405,7 @@ KBUILD_CFLAGS   := -Wall -Wundef -Wstrict-prototypes -Wno-trigraphs \
 		   -fno-strict-aliasing -fno-common \
 		   -Werror-implicit-function-declaration \
 		   -Wno-format-security \
- 		   -Wno-tautological-compare -Wno-logical-not-parentheses \
-		   -Wno-switch-bool \
-		   -Wno-switch-enum \
-		   -Wno-bool-compare \
-		   -Wno-maybe-uninitialized \
+		   -Wno-tautological-compare -Wno-maybe-uninitialized -Wno-switch-bool -Wno-bool-compare -Wno-logical-not-parentheses \
 		   -Werror \
 		   -std=gnu89
 
@@ -492,8 +488,10 @@ KBUILD_CFLAGS += -DANDROID_MAJOR_VERSION=$(MAJOR_VERSION)
 SELINUX_DIR=$(shell $(CONFIG_SHELL) $(srctree)/scripts/find_matching_major.sh "$(srctree)" "security/selinux" "$(ANDROID_MAJOR_VERSION)")
 SDCARDFS_DIR=$(shell $(CONFIG_SHELL) $(srctree)/scripts/find_matching_version.sh "$(srctree)" "fs/sdcardfs" "$(ANDROID_VERSION)")
 else
-export ANDROID_VERSION=990000
-KBUILD_CFLAGS += -DANDROID_VERSION=990000
+export ANDROID_VERSION=800000
+KBUILD_CFLAGS += -DANDROID_VERSION=800000
+export ANDROID_MAJOR_VERSION=8
+KBUILD_CFLAGS += -DANDROID_MAJOR_VERSION=8
 endif
 PHONY += replace_dirs
 replace_dirs:
