@@ -2582,8 +2582,8 @@
    cal-id = <(0x0B040002)>;
    dm-type = <1>;
 
+   max-freq = <2652000>;
    min-freq = <741000>;
-
 
    pm_qos-min-class = <5>;
    pm_qos-max-class = <6>;
