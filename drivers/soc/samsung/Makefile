@@ -50,6 +50,7 @@ obj-$(CONFIG_EXYNOS_SDM) += exynos-sdm.o
 obj-$(CONFIG_EXYNOS_DVFS_MANAGER)	+= exynos-dm.o
 
 obj-$(CONFIG_EXYNOS_MCINFO)	+= exynos-mcinfo.o
+obj-$(CONFIG_STATE_NOTIFIER)	+= state_notifier.o
 
 # secmem
 obj-$(CONFIG_ARCH_EXYNOS)	+= secmem.o
