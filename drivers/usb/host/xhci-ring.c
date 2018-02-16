@@ -280,10 +280,7 @@ void xhci_ring_cmd_db(struct xhci_hcd *xhci)
 	readl(&xhci->dba->doorbell[0]);
 }
 
-<<<<<<< HEAD
 #if defined(CONFIG_USB_HOST_SAMSUNG_FEATURE)
-=======
->>>>>>> 42bf2aff0... Linux 4.4.40>>>4.4.45
 static bool xhci_mod_cmd_timer(struct xhci_hcd *xhci, unsigned long delay)
 {
 	return mod_delayed_work(system_wq, &xhci->cmd_timer, delay);
@@ -306,10 +303,7 @@ static void xhci_handle_stopped_cmd_ring(struct xhci_hcd *xhci,
 	struct xhci_command *i_cmd;
 	u32 cycle_state;
 
-<<<<<<< HEAD
 	xhci_info(xhci, "%s \n", __func__);
-=======
->>>>>>> 42bf2aff0... Linux 4.4.40>>>4.4.45
 	/* Turn all aborted commands in list to no-ops, then restart */
 	list_for_each_entry(i_cmd, &xhci->cmd_list, cmd_list) {
 
@@ -318,11 +312,7 @@ static void xhci_handle_stopped_cmd_ring(struct xhci_hcd *xhci,
 
 		i_cmd->status = COMP_CMD_STOP;
 
-<<<<<<< HEAD
 		xhci_info(xhci, "Turn aborted command %p to no-op\n",
-=======
-		xhci_dbg(xhci, "Turn aborted command %p to no-op\n",
->>>>>>> 42bf2aff0... Linux 4.4.40>>>4.4.45
 			 i_cmd->command_trb);
 		/* get cycle state from the original cmd trb */
 		cycle_state = le32_to_cpu(
@@ -345,16 +335,12 @@ static void xhci_handle_stopped_cmd_ring(struct xhci_hcd *xhci,
 	/* ring command ring doorbell to restart the command ring */
 	if ((xhci->cmd_ring->dequeue != xhci->cmd_ring->enqueue) &&
 	    !(xhci->xhc_state & XHCI_STATE_DYING)) {
-<<<<<<< HEAD
 		xhci_info(xhci, "xhci->xhc_state 0x%x\n", xhci->xhc_state);
-=======
->>>>>>> 42bf2aff0... Linux 4.4.40>>>4.4.45
 		xhci->current_cmd = cur_cmd;
 		xhci_mod_cmd_timer(xhci, XHCI_CMD_DEFAULT_TIMEOUT);
 		xhci_ring_cmd_db(xhci);
 	}
 }
-<<<<<<< HEAD
 #endif
 
 #if defined(CONFIG_USB_HOST_SAMSUNG_FEATURE)
@@ -363,18 +349,12 @@ static int xhci_abort_cmd_ring(struct xhci_hcd *xhci, unsigned long flags)
 #else
 static int xhci_abort_cmd_ring(struct xhci_hcd *xhci)
 #endif
-=======
-
-/* Must be called with xhci->lock held, releases and aquires lock back */
-static int xhci_abort_cmd_ring(struct xhci_hcd *xhci, unsigned long flags)
->>>>>>> 42bf2aff0... Linux 4.4.40>>>4.4.45
 {
 	u64 temp_64;
 	int ret;
 
 	xhci_info(xhci, "Abort command ring\n");
 
-<<<<<<< HEAD
 #if defined(CONFIG_USB_HOST_SAMSUNG_FEATURE)
 	reinit_completion(&xhci->cmd_ring_stop_completion);
 	temp_64 = xhci_read_64(xhci, &xhci->op_regs->cmd_ring);
@@ -382,11 +362,6 @@ static int xhci_abort_cmd_ring(struct xhci_hcd *xhci, unsigned long flags)
 	temp_64 = xhci_read_64(xhci, &xhci->op_regs->cmd_ring);
 	xhci->cmd_ring_state = CMD_RING_STATE_ABORTED;
 #endif
-=======
-	reinit_completion(&xhci->cmd_ring_stop_completion);
-
-	temp_64 = xhci_read_64(xhci, &xhci->op_regs->cmd_ring);
->>>>>>> 42bf2aff0... Linux 4.4.40>>>4.4.45
 	xhci_write_64(xhci, temp_64 | CMD_RING_ABORT,
 			&xhci->op_regs->cmd_ring);
 
@@ -405,20 +380,12 @@ static int xhci_abort_cmd_ring(struct xhci_hcd *xhci, unsigned long flags)
 			      &xhci->op_regs->cmd_ring);
 		udelay(1000);
 		ret = xhci_handshake(&xhci->op_regs->cmd_ring,
-<<<<<<< HEAD
 				     CMD_RING_RUNNING, 0, 5 * 100 * 1000);
 #if defined (CONFIG_USB_HOST_SAMSUNG_FEATURE)
-=======
-				     CMD_RING_RUNNING, 0, 3 * 1000 * 1000);
->>>>>>> 42bf2aff0... Linux 4.4.40>>>4.4.45
 		if (ret < 0) {
 			xhci_err(xhci, "Stopped the command ring failed, "
 				 "maybe the host is dead\n");
 			xhci->xhc_state |= XHCI_STATE_DYING;
-<<<<<<< HEAD
-=======
-			xhci_quiesce(xhci);
->>>>>>> 42bf2aff0... Linux 4.4.40>>>4.4.45
 			xhci_halt(xhci);
 			return -ESHUTDOWN;
 		}
@@ -429,7 +396,6 @@ static int xhci_abort_cmd_ring(struct xhci_hcd *xhci, unsigned long flags)
 	 * but the completion event in never sent. Wait 2 secs (arbitrary
 	 * number) to handle those cases after negation of CMD_RING_RUNNING.
 	 */
-<<<<<<< HEAD
 
 	ret = wait_for_completion_timeout(&xhci->cmd_ring_stop_completion,
 					  msecs_to_jiffies(2000));
@@ -451,17 +417,6 @@ static int xhci_abort_cmd_ring(struct xhci_hcd *xhci, unsigned long flags)
 		xhci_halt(xhci);
 		return -ESHUTDOWN;
 #endif
-=======
-	spin_unlock_irqrestore(&xhci->lock, flags);
-	ret = wait_for_completion_timeout(&xhci->cmd_ring_stop_completion,
-					  msecs_to_jiffies(2000));
-	spin_lock_irqsave(&xhci->lock, flags);
-	if (!ret) {
-		xhci_dbg(xhci, "No stop event for abort, ring start fail?\n");
-		xhci_cleanup_command_queue(xhci);
-	} else {
-		xhci_handle_stopped_cmd_ring(xhci, xhci_next_queued_cmd(xhci));
->>>>>>> 42bf2aff0... Linux 4.4.40>>>4.4.45
 	}
 
 	return 0;
@@ -1333,7 +1288,6 @@ void xhci_cleanup_command_queue(struct xhci_hcd *xhci)
 		xhci_complete_del_and_free_cmd(cur_cmd, COMP_CMD_ABORT);
 }
 
-<<<<<<< HEAD
 #ifndef CONFIG_USB_HOST_SAMSUNG_FEATURE
 /*
  * Turn all commands on command ring with status set to "aborted" to no-op trbs.
@@ -1391,23 +1345,17 @@ void xhci_handle_command_timeout(struct work_struct *work)
 #else
 void xhci_handle_command_timeout(unsigned long data)
 #endif
-=======
-void xhci_handle_command_timeout(struct work_struct *work)
->>>>>>> 42bf2aff0... Linux 4.4.40>>>4.4.45
 {
 	struct xhci_hcd *xhci;
 	int ret;
 	unsigned long flags;
 	u64 hw_ring_state;
-<<<<<<< HEAD
 	bool second_timeout = false;
 #if defined(CONFIG_USB_HOST_SAMSUNG_FEATURE)
 	xhci = container_of(to_delayed_work(work), struct xhci_hcd, cmd_timer);
 #else
 	xhci = (struct xhci_hcd *) data;
 #endif
-=======
->>>>>>> 42bf2aff0... Linux 4.4.40>>>4.4.45
 
 	xhci = container_of(to_delayed_work(work), struct xhci_hcd, cmd_timer);
 
@@ -1428,7 +1376,7 @@ void xhci_handle_command_timeout(struct work_struct *work)
 	hw_ring_state = xhci_read_64(xhci, &xhci->op_regs->cmd_ring);
 	if ((xhci->cmd_ring_state & CMD_RING_STATE_RUNNING) &&
 	    (hw_ring_state & CMD_RING_RUNNING))  {
-<<<<<<< HEAD
+
 #if defined(CONFIG_USB_HOST_SAMSUNG_FEATURE)
 		spin_unlock_irqrestore(&xhci->lock, flags);
 		/* Prevent new doorbell, and start command abort */
@@ -1459,10 +1407,6 @@ time_out_completed:
 	return;
 #else
 		spin_unlock_irqrestore(&xhci->lock, flags);
-=======
-		/* Prevent new doorbell, and start command abort */
-		xhci->cmd_ring_state = CMD_RING_STATE_ABORTED;
->>>>>>> 42bf2aff0... Linux 4.4.40>>>4.4.45
 		xhci_dbg(xhci, "Command timeout\n");
 		ret = xhci_abort_cmd_ring(xhci, flags);
 		if (unlikely(ret == -ESHUTDOWN)) {
@@ -1524,7 +1468,6 @@ static void handle_cmd_completion(struct xhci_hcd *xhci,
 
 	cmd = list_entry(xhci->cmd_list.next, struct xhci_command, cmd_list);
 
-<<<<<<< HEAD
 	if (cmd->command_trb != xhci->cmd_ring->dequeue) {
 		xhci_err(xhci,
 			 "Command completion event does not match command\n");
@@ -1536,9 +1479,6 @@ static void handle_cmd_completion(struct xhci_hcd *xhci,
 #else
 	del_timer(&xhci->cmd_timer);
 #endif
-=======
-	cancel_delayed_work(&xhci->cmd_timer);
->>>>>>> 42bf2aff0... Linux 4.4.40>>>4.4.45
 
 	trace_xhci_cmd_completion(cmd_trb, (struct xhci_generic_trb *) event);
 
@@ -1546,15 +1486,12 @@ static void handle_cmd_completion(struct xhci_hcd *xhci,
 
 	/* If CMD ring stopped we own the trbs between enqueue and dequeue */
 	if (cmd_comp_code == COMP_CMD_STOP) {
-<<<<<<< HEAD
+
 #if defined(CONFIG_USB_HOST_SAMSUNG_FEATURE)
 		complete_all(&xhci->cmd_ring_stop_completion);
 #else
 		xhci_handle_stopped_cmd_ring(xhci, cmd);
 #endif
-=======
-		complete_all(&xhci->cmd_ring_stop_completion);
->>>>>>> 42bf2aff0... Linux 4.4.40>>>4.4.45
 		return;
 	}
 
@@ -1637,17 +1574,12 @@ static void handle_cmd_completion(struct xhci_hcd *xhci,
 	if (cmd->cmd_list.next != &xhci->cmd_list) {
 		xhci->current_cmd = list_entry(cmd->cmd_list.next,
 					       struct xhci_command, cmd_list);
-<<<<<<< HEAD
+
 #if defined(CONFIG_USB_HOST_SAMSUNG_FEATURE)
 		xhci_mod_cmd_timer(xhci, XHCI_CMD_DEFAULT_TIMEOUT);
 #else
 		mod_timer(&xhci->cmd_timer, jiffies + XHCI_CMD_DEFAULT_TIMEOUT);
 #endif
-=======
-		xhci_mod_cmd_timer(xhci, XHCI_CMD_DEFAULT_TIMEOUT);
-	} else if (xhci->current_cmd == cmd) {
-		xhci->current_cmd = NULL;
->>>>>>> 42bf2aff0... Linux 4.4.40>>>4.4.45
 	}
 
 event_handled:
@@ -4280,7 +4212,7 @@ static int queue_command(struct xhci_hcd *xhci, struct xhci_command *cmd,
 
 	/* if there are no other commands queued we start the timeout timer */
 	if (xhci->cmd_list.next == &cmd->cmd_list &&
-<<<<<<< HEAD
+
 #if defined(CONFIG_USB_HOST_SAMSUNG_FEATURE)
 	    !delayed_work_pending(&xhci->cmd_timer)) {
 #else
@@ -4292,11 +4224,6 @@ static int queue_command(struct xhci_hcd *xhci, struct xhci_command *cmd,
 #else
 		mod_timer(&xhci->cmd_timer, jiffies + XHCI_CMD_DEFAULT_TIMEOUT);
 #endif
-=======
-	    !delayed_work_pending(&xhci->cmd_timer)) {
-		xhci->current_cmd = cmd;
-		xhci_mod_cmd_timer(xhci, XHCI_CMD_DEFAULT_TIMEOUT);
->>>>>>> 42bf2aff0... Linux 4.4.40>>>4.4.45
 	}
 
 	queue_trb(xhci, xhci->cmd_ring, false, field1, field2, field3,
