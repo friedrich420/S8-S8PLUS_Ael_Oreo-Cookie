@@ -413,12 +413,8 @@ static inline int xfrm_replay_verify_len(struct xfrm_replay_state_esn *replay_es
 	ulen = xfrm_replay_state_esn_len(up);
 
 	/* Check the overall length and the internal bitmap length to avoid
-<<<<<<< HEAD
 	 * potential overflow.
 	 */
-=======
-	 * potential overflow. */
->>>>>>> 963e9904c... Linux 4.4.55>>>4.4.60
 	if (nla_len(rp) < ulen ||
 	    xfrm_replay_state_esn_len(replay_esn) != ulen ||
 	    replay_esn->bmp_len != up->bmp_len)
