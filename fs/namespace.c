@@ -973,7 +973,6 @@ vfs_kern_mount(struct file_system_type *type, int flags, const char *name, void 
 	if (!mnt)
 		return ERR_PTR(-ENOMEM);
 
-<<<<<<< HEAD
 #ifdef CONFIG_RKP_NS_PROT
 	rkp_call(RKP_CMDID(0x56), (u64)(mnt->mnt), (u64)NULL, 0, 0, 0);
 #else
@@ -1007,12 +1006,6 @@ vfs_kern_mount(struct file_system_type *type, int flags, const char *name, void 
 #else
 	root = mount_fs(type, flags, name, &mnt->mnt, data);
 #endif
-=======
-	if (flags & MS_KERNMOUNT)
-		mnt->mnt.mnt_flags = MNT_INTERNAL;
-
-	root = mount_fs(type, flags, name, data);
->>>>>>> 9bbdc84af... Linux 4.4.50>>>4.4.55
 	if (IS_ERR(root)) {
 		mnt_free_id(mnt);
 		free_vfsmnt(mnt);
@@ -3215,7 +3208,6 @@ void __init mnt_init(void)
 	mnt_cache = kmem_cache_create("mnt_cache", sizeof(struct mount),
 			0, SLAB_HWCACHE_ALIGN | SLAB_PANIC, NULL);
 
-<<<<<<< HEAD
 #ifdef CONFIG_RKP_NS_PROT
 	vfsmnt_cache = kmem_cache_create("vfsmnt_cache", sizeof(struct vfsmount),
 			0, SLAB_HWCACHE_ALIGN | SLAB_PANIC, cred_ctor_vfsmount);
@@ -3231,8 +3223,6 @@ void __init mnt_init(void)
 		(u64)&voff, 0, 0);
 #endif
 
-=======
->>>>>>> 9bbdc84af... Linux 4.4.50>>>4.4.55
 	mount_hashtable = alloc_large_system_hash("Mount-cache",
 				sizeof(struct hlist_head),
 				mhash_entries, 19,
@@ -3362,7 +3352,6 @@ static bool fs_fully_visible(struct file_system_type *type, int *new_mnt_flags)
 		/* Don't miss readonly hidden in the superblock flags */
 		if (mnt->mnt.mnt_sb->s_flags & MS_RDONLY)
 			mnt_flags |= MNT_LOCK_READONLY;
-#endif
 
 		/* Verify the mount flags are equal to or more permissive
 		 * than the proposed new mount.

@@ -1740,29 +1740,25 @@ static struct packet_fanout *fanout_release(struct sock *sk)
 	if (f) {
 		po->fanout = NULL;
 
-<<<<<<< HEAD
 		if (atomic_dec_and_test(&f->sk_ref)) {
 			list_del(&f->list);
 			dev_remove_pack(&f->prot_hook);
 			fanout_release_data(f);
 			kfree(f);
 		}
-=======
+
 		if (atomic_dec_and_test(&f->sk_ref))
 			list_del(&f->list);
 		else
 			f = NULL;
->>>>>>> 9bbdc84af... Linux 4.4.50>>>4.4.55
 
 		if (po->rollover)
 			kfree_rcu(po->rollover, rcu);
 	}
 	mutex_unlock(&fanout_mutex);
 
-<<<<<<< HEAD
-=======
 	return f;
->>>>>>> 9bbdc84af... Linux 4.4.50>>>4.4.55
+
 }
 
 static bool packet_extra_vlan_len_allowed(const struct net_device *dev,
