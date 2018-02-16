@@ -1576,7 +1576,7 @@ static struct blkcg_policy_data *cfq_cpd_alloc(gfp_t gfp)
 {
 	struct cfq_group_data *cgd;
 
-	cgd = kzalloc(sizeof(*cgd), gfp);
+	cgd = kzalloc(sizeof(*cgd), GFP_KERNEL);
 	if (!cgd)
 		return NULL;
 	return &cgd->cpd;
