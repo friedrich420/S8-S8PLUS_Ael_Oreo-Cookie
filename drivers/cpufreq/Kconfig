@@ -194,6 +194,30 @@ config CPU_FREQ_DEFAULT_GOV_IMPULSE
 		loading your cpufreq low-level hardware driver, using the
 		'impulse' governor for latency-sensitive workloads.
 
+config CPU_FREQ_DEFAULT_GOV_YANKACTIVE
+ 	   bool "yankactive"
+  	   select CPU_FREQ_GOV_YANKACTIVE
+	   help
+	   Use the CPUFreq governor 'yankactive' as default. This allows
+	   you to get a full dynamic cpu frequency capable system by simply
+	   loading your cpufreq low-level hardware driver, using the
+	   'yankactive' governor for latency-sensitive workloads.
+
+config CPU_FREQ_DEFAULT_GOV_INTERACTIVE_PRO
+	bool "interactive_pro"
+	select CPU_FREQ_GOV_INTERACTIVE_PRO
+	help
+	Use the CPUFreq governor 'interactive_pro' as default.
+
+config CPU_FREQ_DEFAULT_GOV_CAFACTIVE
+	bool "cafactive"
+	select CPU_FREQ_GOV_CAFACTIVE
+	help
+	  Use the CPUFreq governor 'cafactive' as default. This allows
+	  you to get a full dynamic cpu frequency capable system by simply
+	  loading your cpufreq low-level hardware driver, using the
+	  'cafactive' governor for latency-sensitive workloads.
+
 endchoice
 
 config CPU_FREQ_GOV_PERFORMANCE
@@ -353,6 +377,30 @@ config CPU_FREQ_GOV_IMPULSE
 		designed for latency-sensitive workloads.
 
 		If in doubt, say N.
+
+config CPU_FREQ_GOV_YANKACTIVE
+	  tristate "'yankactive' cpufreq policy governor"
+	  help
+	  'yankactive' - This driver adds a dynamic cpufreq policy governor
+	  designed for latency-sensitive workloads.
+	  The governor is based on interactive with just different default settings
+	  and can be achieved using interactive with a script. This is added for
+	  simplification purposes for myself.
+
+config CPU_FREQ_GOV_INTERACTIVE_PRO
+	tristate "'interactive_pro' cpufreq governor"
+	depends on CPU_FREQ
+
+config CPU_FREQ_GOV_CAFACTIVE
+	tristate "'cafactive' cpufreq policy governor"
+	help
+	  'cafactive' - CodeAurora(Qualcomm) version of interactive
+	  cpufreq policy governor.
+
+	  To compile this driver as a module, choose M here: the
+	  module will be called cpufreq_cafactive.
+
+	  If in doubt, say N.
 
 config CPU_FREQ_GOV_SCHEDUTIL
 	tristate "'schedutil' cpufreq policy governor"
