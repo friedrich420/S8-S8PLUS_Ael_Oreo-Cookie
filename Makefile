@@ -409,15 +409,11 @@ KBUILD_CFLAGS   := -Wall -Wundef -Wstrict-prototypes -Wno-trigraphs \
 		   -fno-strict-aliasing -fno-common \
 		   -Werror-implicit-function-declaration \
 		   -Wno-format-security \
-<<<<<<< HEAD
 		   -Wno-tautological-compare -Wno-maybe-uninitialized -Wno-uninitialized \
 		   -Wno-unused-value -Wno-unused-variable \
 		   -Werror \
-		   -std=gnu89
-=======
 		   -std=gnu89 $(call cc-option,-fno-PIE)
 
->>>>>>> c15eeba34... Linux 4.4.30>>>4.4.35
 
 KBUILD_AFLAGS_KERNEL :=
 KBUILD_CFLAGS_KERNEL :=
