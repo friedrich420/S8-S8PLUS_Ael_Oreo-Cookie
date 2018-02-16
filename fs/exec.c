@@ -1188,13 +1188,9 @@ EXPORT_SYMBOL(flush_old_exec);
 
 void would_dump(struct linux_binprm *bprm, struct file *file)
 {
-<<<<<<< HEAD
-	if (inode_permission2(file->f_path.mnt, file_inode(file), MAY_READ) < 0)
-=======
 	struct inode *inode = file_inode(file);
 	if (inode_permission(inode, MAY_READ) < 0) {
 		struct user_namespace *old, *user_ns;
->>>>>>> accfa9d0b... Linux 4.4.35>>>4.4.40
 		bprm->interp_flags |= BINPRM_FLAGS_ENFORCE_NONDUMP;
 
 		/* Ensure mm->user_ns contains the executable */
