@@ -8538,11 +8538,7 @@ SYSCALL_DEFINE5(perf_event_open,
 		 * Check if we raced against another sys_perf_event_open() call
 		 * moving the software group underneath us.
 		 */
-<<<<<<< HEAD
 		if (!(group_leader->group_caps & PERF_EV_CAP_SOFTWARE)) {
-=======
-		if (!(group_leader->group_flags & PERF_GROUP_SOFTWARE)) {
->>>>>>> c55fa6c19... Linux 4.4.60>>>4.4.66
 			/*
 			 * If someone moved the group out from under us, check
 			 * if this new event wound up on the same ctx, if so

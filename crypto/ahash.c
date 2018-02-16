@@ -308,21 +308,11 @@ static void ahash_restore_req(struct ahash_request *req, int err)
 
 	if (!err)
 		memcpy(priv->result, req->result,
-<<<<<<< HEAD
 			   crypto_ahash_digestsize(crypto_ahash_reqtfm(req)));
 	/* Restore the original crypto request. */
 	req->result = priv->result;
 	ahash_request_set_callback(req, priv->flags,
 							   priv->complete, priv->data);
-=======
-		       crypto_ahash_digestsize(crypto_ahash_reqtfm(req)));
-
-	/* Restore the original crypto request. */
-	req->result = priv->result;
-
-	ahash_request_set_callback(req, priv->flags,
-				   priv->complete, priv->data);
->>>>>>> c55fa6c19... Linux 4.4.60>>>4.4.66
 	req->priv = NULL;
 
 	/* Free the req->priv.priv from the ADJUSTED request. */
@@ -347,10 +337,7 @@ static void ahash_op_unaligned_done(struct crypto_async_request *req, int err)
 		ahash_notify_einprogress(areq);
 		return;
 	}
-<<<<<<< HEAD
-=======
 
->>>>>>> c55fa6c19... Linux 4.4.60>>>4.4.66
 	/*
 	 * Restore the original request, see ahash_op_unaligned() for what
 	 * goes where.
@@ -378,15 +365,9 @@ static int ahash_op_unaligned(struct ahash_request *req,
 
 	err = op(req);
 	if (err == -EINPROGRESS ||
-<<<<<<< HEAD
 		(err == -EBUSY && (ahash_request_flags(req) &
 						   CRYPTO_TFM_REQ_MAY_BACKLOG)))
 			return err;
-=======
-	    (err == -EBUSY && (ahash_request_flags(req) &
-			       CRYPTO_TFM_REQ_MAY_BACKLOG)))
-		return err;
->>>>>>> c55fa6c19... Linux 4.4.60>>>4.4.66
 
 	ahash_restore_req(req, err);
 
@@ -449,15 +430,9 @@ static int ahash_def_finup_finish1(struct ahash_request *req, int err)
 
 	err = crypto_ahash_reqtfm(req)->final(req);
 	if (err == -EINPROGRESS ||
-<<<<<<< HEAD
 		(err == -EBUSY && (ahash_request_flags(req) &
 						   CRYPTO_TFM_REQ_MAY_BACKLOG)))
 			return err;
-=======
-	    (err == -EBUSY && (ahash_request_flags(req) &
-			       CRYPTO_TFM_REQ_MAY_BACKLOG)))
-		return err;
->>>>>>> c55fa6c19... Linux 4.4.60>>>4.4.66
 
 out:
 	ahash_restore_req(req, err);
@@ -472,15 +447,6 @@ static void ahash_def_finup_done1(struct crypto_async_request *req, int err)
 		ahash_notify_einprogress(areq);
 		return;
 	}
-<<<<<<< HEAD
-=======
-
-	areq->base.flags &= ~CRYPTO_TFM_REQ_MAY_SLEEP;
-
-	err = ahash_def_finup_finish1(areq, err);
-	if (areq->priv)
-		return;
->>>>>>> c55fa6c19... Linux 4.4.60>>>4.4.66
 
 	areq->base.flags &= ~CRYPTO_TFM_REQ_MAY_SLEEP;
 
@@ -501,16 +467,10 @@ static int ahash_def_finup(struct ahash_request *req)
 
 	err = tfm->update(req);
 	if (err == -EINPROGRESS ||
-<<<<<<< HEAD
 		(err == -EBUSY && (ahash_request_flags(req) &
 						   CRYPTO_TFM_REQ_MAY_BACKLOG)))
 			return err;
-=======
-	    (err == -EBUSY && (ahash_request_flags(req) &
-			       CRYPTO_TFM_REQ_MAY_BACKLOG)))
-		return err;
 
->>>>>>> c55fa6c19... Linux 4.4.60>>>4.4.66
 	return ahash_def_finup_finish1(req, err);
 }
 
