@@ -2143,6 +2143,7 @@ static int cpuset_allow_attach(struct cgroup_taskset *tset)
 			return -EACCES;
 	}
 
+	return 0;
 }
 
 /*
