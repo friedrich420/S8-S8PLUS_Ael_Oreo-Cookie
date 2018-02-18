@@ -522,7 +522,6 @@ static inline bool d_is_fallthru(const struct dentry *dentry)
 	return dentry->d_flags & DCACHE_FALLTHRU;
 }
 
-
 extern int sysctl_vfs_cache_pressure;
 
 static inline unsigned long vfs_pressure_ratio(unsigned long val)
@@ -605,12 +604,6 @@ static inline struct inode *vfs_select_inode(struct dentry *dentry,
 	return inode;
 }
 
-struct name_snapshot {
-	const char *name;
-	char inline_name[DNAME_INLINE_LEN];
-};
-void take_dentry_name_snapshot(struct name_snapshot *, struct dentry *);
-void release_dentry_name_snapshot(struct name_snapshot *);
 /**
  * d_real_inode - Return the real inode
  * @dentry: The dentry to query
@@ -622,5 +615,12 @@ static inline struct inode *d_real_inode(struct dentry *dentry)
 {
 	return d_backing_inode(d_real(dentry));
 }
+
+struct name_snapshot {
+	const char *name;
+	char inline_name[DNAME_INLINE_LEN];
+};
+void take_dentry_name_snapshot(struct name_snapshot *, struct dentry *);
+void release_dentry_name_snapshot(struct name_snapshot *);
 
 #endif	/* __LINUX_DCACHE_H */
