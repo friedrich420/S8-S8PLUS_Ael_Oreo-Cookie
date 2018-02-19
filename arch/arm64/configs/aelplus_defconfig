@@ -1,6 +1,6 @@
 #
 # Automatically generated file; DO NOT EDIT.
-# Linux/arm64 4.4.94 Kernel Configuration
+# Linux/arm64 4.4.103 Kernel Configuration
 #
 CONFIG_ARM64=y
 CONFIG_64BIT=y
@@ -981,6 +981,8 @@ CONFIG_IP6_NF_TARGET_MASQUERADE=y
 # CONFIG_L2TP is not set
 # CONFIG_BRIDGE is not set
 CONFIG_HAVE_NET_DSA=y
+CONFIG_NET_DSA=y
+# CONFIG_NET_DSA_HWMON is not set
 # CONFIG_VLAN_8021Q is not set
 # CONFIG_DECNET is not set
 # CONFIG_LLC2 is not set
