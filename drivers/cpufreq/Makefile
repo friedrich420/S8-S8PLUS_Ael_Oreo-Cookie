@@ -32,6 +32,10 @@ obj-$(CONFIG_CPU_FREQ_GOV_SMARTMAX)	+= cpufreq_smartmax.o
 obj-$(CONFIG_CPU_FREQ_GOV_SMARTMAX_EPS)		+= cpufreq_smartmax_eps.o
 
 obj-$(CONFIG_CPU_FREQ_GOV_CULTIVATION)	+= cpufreq_cultivation.o
+obj-$(CONFIG_CPU_FREQ_GOV_BARRY_ALLEN)	+= cpufreq_barry_allen.o
+obj-$(CONFIG_CPU_FREQ_GOV_PEGASUSQ)	+= cpufreq_pegasusq.o
+obj-$(CONFIG_CPU_FREQ_GOV_CONSERVATIVEX) += cpufreq_conservativex.o
+obj-$(CONFIG_CPU_FREQ_GOV_WAVE)		+= cpufreq_wave.o
 
 obj-$(CONFIG_CPUFREQ_DT)		+= cpufreq-dt.o
 
