@@ -310,16 +310,6 @@ static int process_check_accessory(void *data)
 						     USB_CCIC_VR_USE_COUNT);
 #endif
 				break;
-			case DEXDOCK_PRODUCT_ID:
-				acc_type = CCIC_DOCK_DEX;
-				pr_info("%s : Samsung DEX connected.\n",
-					__func__);
-#if defined(CONFIG_USB_HW_PARAM)
-				if (o_notify)
-					inc_hw_param(o_notify,
-						     USB_CCIC_DEX_USE_COUNT);
-#endif
-				break;
 			case DEXPAD_PRODUCT_ID:
 				acc_type = CCIC_DOCK_DEXPAD;
 				pr_info("%s : Samsung DEX PADconnected.\n", __func__);
@@ -360,6 +350,19 @@ static int process_check_accessory(void *data)
 		usbpd_data->acc_type = acc_type;
 	} else
 		acc_type = usbpd_data->acc_type;
+
+	if ((!acc_type) != CCIC_DOCK_NEW || (acc_type == CCIC_DOCK_HDMI) || (acc_type == CCIC_DOCK_MPA)) {
+		acc_type = CCIC_DOCK_DEX;
+		pid = DEXDOCK_PRODUCT_ID;
+		vid = SAMSUNG_VENDOR_ID;
+		pr_info("%s : Samsung DEX connected.\n",
+			__func__);
+#if defined(CONFIG_USB_HW_PARAM)
+	if (o_notify)
+		inc_hw_param(o_notify,
+			     USB_CCIC_DEX_USE_COUNT);
+#endif
+	}
 
 	if (acc_type != CCIC_DOCK_NEW)
 		ccic_send_dock_intent(acc_type);
